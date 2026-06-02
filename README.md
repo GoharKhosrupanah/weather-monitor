@@ -1,77 +1,72 @@
 # Weather Monitor
 
-**Intelligent weather monitoring system for Canadian cities**  
-Polls live weather data, detects notable events, and exposes results via a clean HTTP API.
+**Intelligent Weather Monitoring & Notable Event Detection System**
+
+A solution built for the infrastructure monitoring homework. It polls live weather for three Canadian cities, stores unique readings, detects notable events, and exposes everything through a clean HTTP API.
 
 ## Overview
 
-This service monitors weather conditions in **Ottawa, Toronto, and Vancouver** using the Open-Meteo API. It stores readings, detects notable events based on intelligent logic, and provides a REST API for easy access.
+This service monitors weather in:
+- Ottawa
+- Toronto  
+- Vancouver
+
+It uses the free **Open-Meteo API**, stores data in SQLite, and runs fully with Docker.
 
 ## Features
 
-- Real-time weather polling every 5 minutes
-- Automatic deduplication of readings (by city + timestamp)
-- Smart event detection logic (absolute thresholds + contextual changes)
-- Persistent SQLite database
-- Dockerized deployment
-- Clean REST API
+- Polls weather data every 5 minutes
+- Automatic deduplication (only stores new readings by city + timestamp)
+- Custom notable event detection logic
+- Clean REST API with exact required endpoints
+- Full Docker + docker-compose support
+- Professional Cursor setup (rules, agent, skill)
 
-## Architecture
-Poller → Weather API (Open-Meteo) → Database (SQLite)
-↓
-Event Detector
-↓
-FastAPI Endpoints
-## Quick Start (Docker)
+## Quick Start
 
 ```bash
-git clone <your-repo>
+git clone https://github.com/GoharKhosrupanah/weather-monitor.git
 cd weather-monitor
 cp .env.example .env
 docker compose up --build
-he API will be available at: http://localhost:8000
-API Endpoints
 
+API endpoints:
+Endpoint,Description
+GET /health,Service status + counts
+GET /readings?city=Ottawa&limit=50,Latest weather readings
+GET /events?city=Ottawa&limit=50,Notable weather events
 
-
-
-
-
-Method,Endpoint,Description
-GET,/health,Service status + counts
-GET,/readings?city=Ottawa&limit=50,Latest weather readings
-GET,/events?city=Ottawa&limit=50,Notable weather events
-Example: 
-curl http://localhost:8000/health
-curl "http://localhost:8000/readings?city=Ottawa"
-curl "http://localhost:8000/events"
+Example 
+Endpoint,Description
+GET /health,Service status + counts
+GET /readings?city=Ottawa&limit=50,Latest weather readings
+GET /events?city=Ottawa&limit=50,Notable weather events
 
 Event Detection Logic
-Notable events are triggered when:
+My system defines a "notable event" when any of these conditions are met:
 
-Temperature ≥ 20°C (Warm conditions)
-Wind speed ≥ 15 km/h (Windy)
-Precipitation > 0.1 mm/h
-Stable/normal conditions (for monitoring visibility)
+Temperature ≥ 20°C → Warm conditions
+Wind speed ≥ 15 km/h → Windy conditions
+Precipitation > 0.1 mm/h → Rain/Snow detected
+Regular stable readings (for monitoring visibility)
 
-Reasoning: The logic balances sensitivity and noise while being relevant to Canadian weather patterns. It considers both absolute values and trends.
+Reasoning: The logic balances sensitivity and noise. It uses both absolute thresholds and basic context, making it more useful than simple fixed thresholds.
 Cursor Setup
 
-Rules: Project conventions and error handling standards
-Agent: Event Detector Expert
-Skill: analyze_weather.py – Data analysis tool
+Rules (.cursor/rules/): General conventions and error handling rules
+Agent (.cursor/agents/): Event Detector Expert
+Skill (.cursor/skills/): analyze_weather.py — Database analysis tool
 
 Tech Stack
 
-FastAPI – Modern Python web framework
-SQLModel – ORM + Pydantic
-SQLite – Simple persistent storage
-Docker – Containerized deployment
-Open-Meteo – Free weather API
+FastAPI + Uvicorn
+SQLModel + SQLite
+Docker + docker-compose
+httpx + APScheduler
 
-Repo Structure
+Project Structure:
 app/              # Main application code
-.cursor/          # Cursor rules, agents, and skills
-tests/            # Unit tests
+.cursor/          # Cursor AI configuration
 Dockerfile
 docker-compose.yml
+requirements.txt
